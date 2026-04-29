@@ -6,8 +6,91 @@
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// ==========================================
+// Table 1: Users
+// ==========================================
+model User {
+  id              Int      @id @default(autoincrement())
+  name            String
+  paternalSurname String
+  maternalSurname String
+  email           String   @unique
+  
+  // Audit
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  teamMemberships TeamMember[] 
+  ledTeams        Team[]       
+}
+
+// ==========================================
+// Table 2: Team Members (Pivot Table)
+// ==========================================
+model TeamMember {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  teamId    Int
+  role      String   // e.g., "ADMIN", "MEMBER"
+  
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user          User   @relation(fields: [userId], references: [id])
+  team          Team   @relation(fields: [teamId], references: [id])
+  assignedTasks Task[]
+
+  // Composite unique key
+  @@unique([userId, teamId]) 
+}
+
+// ==========================================
+// Table 3: Teams
+// ==========================================
+model Team {
+  id        Int      @id @default(autoincrement())
+  leaderId  Int      
+  name      String
+  
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  leader  User         @relation(fields: [leaderId], references: [id])
+  members TeamMember[] 
+  tasks   Task[]       
+}
+
+// ==========================================
+// Table 4: Tasks
+// ==========================================
+model Task {
+  id               Int       @id @default(autoincrement())
+  assignedMemberId Int       
+  teamId           Int       
+  status           String    // e.g., "TO_DO", "IN_PROGRESS", "DONE"
+  name             String
+  description      String
+  goals            String
+  startDate        DateTime
+  endDate          DateTime
+  
+  // Audit
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relations
+  assignedMember TeamMember @relation(fields: [assignedMemberId], references: [id])
+  team           Team       @relation(fields: [teamId], references: [id])
 }
