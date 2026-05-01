@@ -32,21 +32,36 @@ export class UsersService {
     });
   }
 
-  async createUser(data: CreateUserDto): Promise<User> {
-    return this.prisma.user.create({
-      data,
-    });
+  async createUser(data: CreateUserDto): Promise<User | null> {
+    try {
+      return await this.prisma.user.create({
+        data,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async updateUser(params: {
     where: Prisma.UserWhereUniqueInput;
     data: Prisma.UserUpdateInput;
-  }): Promise<User> {
+  }): Promise<User | null> {
     const { data, where } = params;
-    return this.prisma.user.update({
-      data,
-      where,
-    });
+    try {
+      return await this.prisma.user.update({
+        data,
+        where,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return null
+      }
+      throw error
+    }
+
   }
 
   async removeUser(where: Prisma.UserWhereUniqueInput): Promise<User> {
