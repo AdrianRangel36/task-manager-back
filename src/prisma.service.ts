@@ -6,17 +6,12 @@ import { Pool } from 'pg';
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    console.log('🔍 DATABASE_URL:', process.env.DATABASE_URL);
-    
     if (!process.env.DATABASE_URL) {
       throw new Error('❌ DATABASE_URL no está definida en las variables de entorno');
     }
-
-    // Crear Pool directamente desde la URL de conexión
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
     });
-
     const adapter = new PrismaPg(pool);
     super({ adapter });
   }
