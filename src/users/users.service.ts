@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, Prisma } from '../../generated/prisma/client'
+import * as bcrypt from 'bcrypt'
 
 @Injectable()
 export class UsersService {
@@ -52,8 +53,10 @@ export class UsersService {
 
   async createUser(data: CreateUserDto): Promise<User | Prisma.PrismaClientKnownRequestError> {
     try {
+      const { password, ...restOfData } = data;
+      const hashPassword = await bcrypt.hash(password, 10);
       return await this.prisma.user.create({
-        data,
+        data: { ...restOfData, password: hashPassword },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -65,7 +68,7 @@ export class UsersService {
 
   async updateUser(params: {
     where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
+    data: UpdateUserDto;
   }): Promise<User | Prisma.PrismaClientKnownRequestError> {
     const { data, where } = params;
     try {
