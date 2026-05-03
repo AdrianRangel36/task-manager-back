@@ -2,19 +2,27 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, Prisma } from '../../generated/prisma/client'
-import * as bcrypt from 'bcrypt'
+import { User, Prisma } from '../../generated/prisma/client';
+import * as bcrypt from 'bcrypt';
+import { FindUserDto } from './dto/find-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
-  async user(userWhereUniqueInput: Prisma.UserWhereUniqueInput): Promise<User | Prisma.PrismaClientKnownRequestError | null> {
+  async user(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  ): Promise<FindUserDto | Prisma.PrismaClientKnownRequestError | null> {
     try {
-      const user = await this.prisma.user.findUnique({
+      const record = await this.prisma.user.findUnique({
         where: userWhereUniqueInput,
       });
-      return user;
+      if (record === null) {
+        return record;
+      } else {
+        const { password, ...user } = record;
+        return user;
+      }
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return error;
@@ -29,20 +37,25 @@ export class UsersService {
     cursor?: Prisma.UserWhereUniqueInput;
     where?: Prisma.UserWhereInput;
     orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[] | Prisma.PrismaClientKnownRequestError | null> {
+  }): Promise<FindUserDto[] | Prisma.PrismaClientKnownRequestError | null> {
     try {
       const { skip, take, cursor, where, orderBy } = params;
-      const users = await this.prisma.user.findMany({
+      const records = await this.prisma.user.findMany({
         skip,
         take,
         cursor,
         where,
         orderBy,
       });
-      if (users.length === 0) {
+      if (records.length === 0) {
         return null;
+      } else {
+        const users = records.map((user) => {
+          const { password, ...findUser } = user;
+          return findUser;
+        });
+        return users;
       }
-      return users;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return error;
@@ -51,7 +64,9 @@ export class UsersService {
     }
   }
 
-  async createUser(data: CreateUserDto): Promise<User | Prisma.PrismaClientKnownRequestError> {
+  async createUser(
+    data: CreateUserDto,
+  ): Promise<User | Prisma.PrismaClientKnownRequestError> {
     try {
       const { password, ...restOfData } = data;
       const hashPassword = await bcrypt.hash(password, 10);
@@ -84,7 +99,9 @@ export class UsersService {
     }
   }
 
-  async removeUser(where: Prisma.UserWhereUniqueInput): Promise<User | Prisma.PrismaClientKnownRequestError> {
+  async removeUser(
+    where: Prisma.UserWhereUniqueInput,
+  ): Promise<User | Prisma.PrismaClientKnownRequestError> {
     try {
       return await this.prisma.user.delete({
         where,
