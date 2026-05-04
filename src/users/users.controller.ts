@@ -8,12 +8,14 @@ import {
   Put,
   ConflictException,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Prisma, User } from 'generated/prisma/client';
 import { FindUserDto } from './dto/find-user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -35,6 +37,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<FindUserDto[] | null> {
     const response = await this.usersService.users({ orderBy: { id: 'asc' } });
@@ -49,6 +52,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<FindUserDto> {
     const response = await this.usersService.user({ id: Number(id) });
@@ -67,6 +71,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -89,6 +94,7 @@ export class UsersController {
     return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<User> {
     const response = await this.usersService.removeUser({ id: Number(id) });

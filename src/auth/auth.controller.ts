@@ -16,12 +16,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
-  @Post()
+  @Post('login')
   async login(@Body() data: loginDto) {
     return await this.authService.login(data);
   }
 
-  @Post()
+  @Post('signup')
   async signUp(@Body() data: CreateUserDto) {
     const user = await this.authService.signUp(data);
     if (user instanceof Prisma.PrismaClientKnownRequestError) {
