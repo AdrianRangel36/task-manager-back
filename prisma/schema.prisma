@@ -14,6 +14,15 @@ datasource db {
 }
 
 // ==========================================
+// Enums
+// ==========================================
+enum TeamRole {
+  OWNER    // El creador original del equipo
+  ADMIN    // Puede administrar tareas y miembros
+  MEMBER   // Participante regular
+}
+
+// ==========================================
 // Table 1: Users
 // ==========================================
 model User {
@@ -30,7 +39,6 @@ model User {
 
   // Relations
   teamMemberships TeamMember[] 
-  ledTeams        Team[]       
 }
 
 // ==========================================
@@ -40,16 +48,16 @@ model TeamMember {
   id        Int      @id @default(autoincrement())
   userId    Int
   teamId    Int
-  role      String   // e.g., "ADMIN", "MEMBER"
+  role      TeamRole @default(MEMBER)
   
   // Audit
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  user          User   @relation(fields: [userId], references: [id])
-  team          Team   @relation(fields: [teamId], references: [id])
-  assignedTasks Task[]
+  // Relations 
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team           Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignedTasks  Task[]
 
   // Composite unique key
   @@unique([userId, teamId]) 
@@ -60,7 +68,6 @@ model TeamMember {
 // ==========================================
 model Team {
   id        Int      @id @default(autoincrement())
-  leaderId  Int      
   name      String
   
   // Audit
@@ -68,7 +75,6 @@ model Team {
   updatedAt DateTime @updatedAt
 
   // Relations
-  leader  User         @relation(fields: [leaderId], references: [id])
   members TeamMember[] 
   tasks   Task[]       
 }
