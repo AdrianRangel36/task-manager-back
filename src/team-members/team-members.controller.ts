@@ -1,7 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { TeamMembersService } from './team-members.service';
 import { CreateTeamMemberDto } from './dto/create-team-member.dto';
 import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
+import { FindTeamMemberDto } from './dto/find-team-member-dto';
+import { Prisma } from 'generated/prisma/client';
 
 @Controller('team-members')
 export class TeamMembersController {
@@ -12,11 +15,20 @@ export class TeamMembersController {
     return this.teamMembersService.create(createTeamMemberDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.teamMembersService.findAll();
-  }
+  async findAll(): Promise<FindTeamMemberDto[] | null> {
+    const response = await this.teamMembersService.teamMembers({ orderBy: { id: 'asc' } });
 
+    if (response instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (response.code) {
+        default:
+          throw response;
+      }
+    }
+
+    return response;
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.teamMembersService.findOne(+id);

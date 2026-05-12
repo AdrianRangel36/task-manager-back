@@ -65,15 +65,52 @@ export class TeamService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} team`;
+  async findOne(
+    teamWhereUniqueInput: Prisma.TeamWhereUniqueInput,
+  ): Promise<FindTeamDto | Prisma.PrismaClientKnownRequestError | null> {
+    try {
+      const record = await this.prisma.team.findUnique({
+        where: teamWhereUniqueInput,
+      });
+      return record;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 
-  update(id: number, updateTeamDto: UpdateTeamDto) {
-    return `This action updates a #${id} team`;
+  async update(params: {
+    where: Prisma.TeamWhereUniqueInput;
+    data: UpdateTeamDto;
+  }): Promise<Team | Prisma.PrismaClientKnownRequestError> {
+    const { data, where } = params;
+    try {
+      return await this.prisma.team.update({
+        data,
+        where,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} team`;
+  async remove(
+    where: Prisma.TeamWhereUniqueInput,
+  ): Promise<Team | Prisma.PrismaClientKnownRequestError> {
+    try {
+      return await this.prisma.team.delete({
+        where,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 }
