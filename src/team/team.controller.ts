@@ -49,7 +49,7 @@ export class TeamController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<FindTeamDto> {
-    const response = await this.teamService.findOne({ id: Number(id) });
+    const response = await this.teamService.findOneTeam({ id: Number(id) });
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
       switch (response.code) {
@@ -71,7 +71,7 @@ export class TeamController {
     @Param('id') id: string,
     @Body() updateTeamDto: UpdateTeamDto,
   ): Promise<Team> {
-    const response = await this.teamService.update({
+    const response = await this.teamService.updateTeam({
       where: { id: Number(id) },
       data: updateTeamDto,
     });
@@ -91,7 +91,7 @@ export class TeamController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Team> {
-    const response = await this.teamService.remove({ id: Number(id) });
+    const response = await this.teamService.removeTeam({ id: Number(id) });
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
       switch (response.code) {

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Put,
+  ConflictException,
+} from '@nestjs/common';
 import { TeamMembersService } from './team-members.service';
 import { CreateTeamMemberDto } from './dto/create-team-member.dto';
 import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
@@ -10,15 +21,34 @@ import { Prisma } from 'generated/prisma/client';
 export class TeamMembersController {
   constructor(private readonly teamMembersService: TeamMembersService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createTeamMemberDto: CreateTeamMemberDto) {
-    return this.teamMembersService.create(createTeamMemberDto);
+  async create(@Body() createTeamMemberDto: CreateTeamMemberDto) {
+    const response =
+      await this.teamMembersService.createTeamMember(createTeamMemberDto);
+
+    if (response instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (response.code) {
+        case 'P2002':
+          throw new ConflictException('User already exists');
+        case 'P2025':
+          throw new ConflictException('User or team not found');
+        case 'P2003':
+          throw new ConflictException('Foreign key violation');
+        default:
+          throw response;
+      }
+    }
+
+    return response;
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll(): Promise<FindTeamMemberDto[] | null> {
-    const response = await this.teamMembersService.teamMembers({ orderBy: { id: 'asc' } });
+    const response = await this.teamMembersService.teamMembers({
+      orderBy: { id: 'asc' },
+    });
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
       switch (response.code) {
@@ -29,18 +59,60 @@ export class TeamMembersController {
 
     return response;
   }
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.teamMembersService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const response = await this.teamMembersService.findOneTeamMember(+id);
+
+    if (response instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (response.code) {
+        case 'P2025':
+          throw new ConflictException('Team member not found');
+        default:
+          throw response;
+      }
+    }
+
+    return response;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTeamMemberDto: UpdateTeamMemberDto) {
-    return this.teamMembersService.update(+id, updateTeamMemberDto);
+  @UseGuards(JwtAuthGuard)
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateTeamMemberDto: UpdateTeamMemberDto,
+  ) {
+    const response = await this.teamMembersService.updateTeamMember(
+      +id,
+      updateTeamMemberDto,
+    );
+
+    if (response instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (response.code) {
+        case 'P2025':
+          throw new ConflictException('Team member not found');
+        default:
+          throw response;
+      }
+    }
+
+    return response;
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.teamMembersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const response = await this.teamMembersService.removeTeamMember(+id);
+
+    if (response instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (response.code) {
+        case 'P2025':
+          throw new ConflictException('Team member not found');
+        default:
+          throw response;
+      }
+    }
+
+    return response;
   }
 }

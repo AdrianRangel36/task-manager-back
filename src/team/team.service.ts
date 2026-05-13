@@ -65,7 +65,7 @@ export class TeamService {
     }
   }
 
-  async findOne(
+  async findOneTeam(
     teamWhereUniqueInput: Prisma.TeamWhereUniqueInput,
   ): Promise<FindTeamDto | Prisma.PrismaClientKnownRequestError | null> {
     try {
@@ -81,7 +81,7 @@ export class TeamService {
     }
   }
 
-  async update(params: {
+  async updateTeam(params: {
     where: Prisma.TeamWhereUniqueInput;
     data: UpdateTeamDto;
   }): Promise<Team | Prisma.PrismaClientKnownRequestError> {
@@ -99,7 +99,7 @@ export class TeamService {
     }
   }
 
-  async remove(
+  async removeTeam(
     where: Prisma.TeamWhereUniqueInput,
   ): Promise<Team | Prisma.PrismaClientKnownRequestError> {
     try {

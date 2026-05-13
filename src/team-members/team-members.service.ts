@@ -1,15 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTeamMemberDto } from './dto/create-team-member.dto';
 import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
-import { Prisma } from 'generated/prisma/client';
+import { Prisma, TeamMember } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { FindTeamMemberDto } from './dto/find-team-member-dto';
 
 @Injectable()
 export class TeamMembersService {
   constructor(private prisma: PrismaService) {}
-  create(createTeamMemberDto: CreateTeamMemberDto) {
-    return 'This action adds a new teamMember';
+
+  async createTeamMember(
+    data: CreateTeamMemberDto,
+  ): Promise<TeamMember | Prisma.PrismaClientKnownRequestError> {
+    try {
+      return await this.prisma.teamMember.create({
+        data: {
+          userId: data.userId,
+          teamId: data.teamId,
+          role: data.role,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 
   async teamMembers(params: {
@@ -42,15 +58,50 @@ export class TeamMembersService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} teamMember`;
+  async findOneTeamMember(
+    id: number,
+  ): Promise<TeamMember | Prisma.PrismaClientKnownRequestError | null> {
+    try {
+      return await this.prisma.teamMember.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 
-  update(id: number, updateTeamMemberDto: UpdateTeamMemberDto) {
-    return `This action updates a #${id} teamMember`;
+  async updateTeamMember(
+    id: number,
+    updateTeamMemberDto: UpdateTeamMemberDto,
+  ): Promise<TeamMember | Prisma.PrismaClientKnownRequestError> {
+    try {
+      return await this.prisma.teamMember.update({
+        where: { id },
+        data: updateTeamMemberDto,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} teamMember`;
+  async removeTeamMember(
+    id: number,
+  ): Promise<TeamMember | Prisma.PrismaClientKnownRequestError> {
+    try {
+      return await this.prisma.teamMember.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
   }
 }
