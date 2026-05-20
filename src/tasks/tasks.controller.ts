@@ -29,9 +29,7 @@ export class TasksController {
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
       switch (response.code) {
         case 'P2003':
-          throw new ConflictException(
-            'Invalid team member or team reference',
-          );
+          throw new ConflictException('Invalid team member or team reference');
         case 'P2025':
           throw new NotFoundException('Team member or team not found');
         default:
@@ -43,9 +41,11 @@ export class TasksController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async findAll() {
-    const response = await this.tasksService.findAll();
+  @Get('/team-tasks/:teamId')
+  async findAll(@Param('teamId') teamId: string) {
+    const response = await this.tasksService.findAll({
+      where: { teamId: +teamId },
+    });
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
       throw response;
@@ -77,10 +77,7 @@ export class TasksController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateTaskDto: UpdateTaskDto,
-  ) {
+  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
     const response = await this.tasksService.update(+id, updateTaskDto);
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
@@ -88,9 +85,7 @@ export class TasksController {
         case 'P2025':
           throw new NotFoundException('Task not found');
         case 'P2003':
-          throw new ConflictException(
-            'Invalid team member or team reference',
-          );
+          throw new ConflictException('Invalid team member or team reference');
         default:
           throw response;
       }
