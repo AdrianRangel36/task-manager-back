@@ -7,7 +7,7 @@ import { Pool } from 'pg';
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
     if (!process.env.DATABASE_URL) {
-      throw new Error('❌ DATABASE_URL no está definida en las variables de entorno');
+      throw new Error('DATABASE URL NOT DEFINED');
     }
     const pool = new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -19,9 +19,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleInit() {
     try {
       await this.$connect();
-      console.log('✅ Base de datos conectada exitosamente');
+      console.log('SUCCESSFUL CONECTION');
     } catch (error) {
-      console.error('❌ Error al conectar a la base de datos:', error);
+      console.error('ERROR TRYING TO CONECT', error);
       throw error;
     }
   }
@@ -29,9 +29,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleDestroy() {
     try {
       await this.$disconnect();
-      console.log('✅ Desconexión de base de datos completada');
+      console.log('SUCCESSFUL DESTROY');
     } catch (error) {
-      console.error('❌ Error al desconectar de la base de datos:', error);
+      console.error('ERROR:', error);
     }
   }
 }

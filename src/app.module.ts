@@ -5,9 +5,17 @@ import { TeamMembersModule } from './team-members/team-members.module';
 import { TeamModule } from './team/team.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AuthModule } from './auth/auth.module';
+import { PrismaModule } from './prisma.module';
 
 @Module({
-  imports: [UsersModule, TeamMembersModule, TeamModule, TasksModule, AuthModule],
+  imports: [
+    UsersModule,
+    TeamMembersModule,
+    TeamModule,
+    TasksModule,
+    AuthModule,
+    PrismaModule,
+  ],
   controllers: [],
   providers: [],
 })
