@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTeamMemberDto } from './dto/create-team-member.dto';
 import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
-import { Prisma, TeamMember } from 'generated/prisma/client';
+import { Prisma, Team, TeamMember } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { FindTeamMemberDto } from './dto/find-team-member-dto';
 
@@ -65,6 +65,25 @@ export class TeamMembersService {
       return await this.prisma.teamMember.findUnique({
         where: { id },
       });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return error;
+      }
+      throw error;
+    }
+  }
+
+  async findUserTeams(
+    id: number,
+  ): Promise<Number[] | Prisma.PrismaClientKnownRequestError | null> {
+    try {
+      const records = await this.prisma.teamMember.findMany({
+        where: { userId: id },
+      });
+      const teamsIds = records.map((team) => {
+        return team.teamId;
+      });
+      return teamsIds;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         return error;
