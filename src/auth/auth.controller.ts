@@ -2,14 +2,19 @@ import {
   Body,
   ConflictException,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { loginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { Prisma } from 'generated/prisma/client';
+import type { User } from 'generated/prisma/client';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -34,5 +39,12 @@ export class AuthController {
     }
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('verify')
+  verifyToken(@CurrentUser() user: User) {
+    // Si llega aquí, el token es 100% válido
+    return { valid: true, userId: user.id };
   }
 }
