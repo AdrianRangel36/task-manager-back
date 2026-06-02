@@ -113,4 +113,23 @@ export class TeamService {
       throw error;
     }
   }
+
+  async checkMembership(
+    userId: number,
+    teamId: number,
+  ): Promise<boolean> {
+    try {
+      const member = await this.prisma.teamMember.findUnique({
+        where: {
+          userId_teamId: {
+            userId,
+            teamId,
+          },
+        },
+      });
+      return !!member;
+    } catch (error) {
+      return false;
+    }
+  }
 }

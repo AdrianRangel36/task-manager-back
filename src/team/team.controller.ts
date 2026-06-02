@@ -17,6 +17,7 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Prisma, type User, Team } from 'generated/prisma/client';
 import { FindTeamDto } from './dto/find-team.dto';
 import { TeamMembersService } from 'src/team-members/team-members.service';
+import { ForbiddenException } from '@nestjs/common';
 
 @Controller('team')
 export class TeamController {
@@ -86,7 +87,19 @@ export class TeamController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<FindTeamDto> {
+  async findOne(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+  ): Promise<FindTeamDto> {
+    const isMember = await this.teamService.checkMembership(
+      user.id,
+      Number(id),
+    );
+
+    if (!isMember) {
+      throw new ForbiddenException('No tienes acceso a este equipo');
+    }
+
     const response = await this.teamService.findOneTeam({ id: Number(id) });
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
