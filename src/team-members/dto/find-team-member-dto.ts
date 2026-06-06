@@ -7,4 +7,9 @@ export class FindTeamMemberDto {
   teamId: number;
   createdAt: Date;
   updatedAt: Date;
+  user?: {
+    name: string;
+    paternalSurname: string;
+    maternalSurname: string;
+  };
 }

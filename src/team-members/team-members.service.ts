@@ -45,6 +45,15 @@ export class TeamMembersService {
         cursor,
         where,
         orderBy,
+        include: {
+          user: {
+            select: {
+              name: true,
+              paternalSurname: true,
+              maternalSurname: true,
+            },
+          },
+        },
       });
       if (records.length === 0) {
         return null;
