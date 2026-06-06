@@ -44,10 +44,13 @@ export class TeamMembersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async findAll(): Promise<FindTeamMemberDto[] | null> {
+  @Get('findallteam/:id')
+  async findAllTeamMembers(
+    @Param('id') id: string,
+  ): Promise<FindTeamMemberDto[] | null> {
     const response = await this.teamMembersService.teamMembers({
       orderBy: { id: 'asc' },
+      where: { teamId: +id },
     });
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
@@ -60,7 +63,7 @@ export class TeamMembersController {
     return response;
   }
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
+  @Get('findone/:id')
   async findOne(@Param('id') id: string) {
     const response = await this.teamMembersService.findOneTeamMember(+id);
 
