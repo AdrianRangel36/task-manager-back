@@ -4,6 +4,7 @@ import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
 import { Prisma, Team, TeamMember } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { FindTeamMemberDto } from './dto/find-team-member-dto';
+import { DeleteTeamMember } from './dto/delete-team-member.dto';
 
 @Injectable()
 export class TeamMembersService {
@@ -119,11 +120,16 @@ export class TeamMembersService {
   }
 
   async removeTeamMember(
-    id: number,
+    deleteTeamMember: DeleteTeamMember,
   ): Promise<TeamMember | Prisma.PrismaClientKnownRequestError> {
     try {
       return await this.prisma.teamMember.delete({
-        where: { id },
+        where: {
+          userId_teamId: {
+            userId: deleteTeamMember.userId,
+            teamId: deleteTeamMember.teamId,
+          },
+        },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {

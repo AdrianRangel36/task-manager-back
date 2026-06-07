@@ -16,6 +16,7 @@ import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
 import { FindTeamMemberDto } from './dto/find-team-member-dto';
 import { Prisma } from 'generated/prisma/client';
+import { DeleteTeamMember } from './dto/delete-team-member.dto';
 
 @Controller('team-members')
 export class TeamMembersController {
@@ -103,9 +104,9 @@ export class TeamMembersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  async remove(@Param('id') id: string) {
-    const response = await this.teamMembersService.removeTeamMember(+id);
+  @Delete('leaveteam')
+  async remove(@Body() deleteTeamMember: DeleteTeamMember) {
+    const response = await this.teamMembersService.removeTeamMember(deleteTeamMember);
 
     if (response instanceof Prisma.PrismaClientKnownRequestError) {
       switch (response.code) {
