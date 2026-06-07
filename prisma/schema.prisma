@@ -98,6 +98,6 @@ model Task {
   updatedAt        DateTime  @updatedAt
 
   // Relations
-  assignedMember TeamMember @relation(fields: [assignedMemberId], references: [id])
-  team           Team       @relation(fields: [teamId], references: [id])
+  assignedMember TeamMember @relation(fields: [assignedMemberId], references: [id], onDelete: Cascade)
+  team           Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
 }
