@@ -53,6 +53,25 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('search/:email')
+  async findByEmail(@Param('email') email: string): Promise<FindUserDto> {
+    const response = await this.usersService.user({ email: email });
+
+    if (response instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (response.code) {
+        default:
+          throw response;
+      }
+    }
+
+    if (response === null) {
+      throw new NotFoundException(`User not found`);
+    }
+
+    return response;
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<FindUserDto> {
     const response = await this.usersService.user({ id: Number(id) });
