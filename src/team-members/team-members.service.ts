@@ -5,6 +5,7 @@ import { Prisma, Team, TeamMember } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma.service';
 import { FindTeamMemberDto } from './dto/find-team-member-dto';
 import { DeleteTeamMember } from './dto/delete-team-member.dto';
+import { FindUserTeamDto } from '../global_dto/find-user-teams.dto';
 
 @Injectable()
 export class TeamMembersService {
@@ -85,13 +86,17 @@ export class TeamMembersService {
 
   async findUserTeams(
     id: number,
-  ): Promise<Number[] | Prisma.PrismaClientKnownRequestError | null> {
+  ): Promise<FindUserTeamDto[] | Prisma.PrismaClientKnownRequestError | null> {
     try {
       const records = await this.prisma.teamMember.findMany({
         where: { userId: id },
+        include: { team: { select: { name: true } } },
       });
+      if (records.length === 0) {
+        return null
+      }
       const teamsIds = records.map((team) => {
-        return team.teamId;
+        return { teamId: team.teamId, name: team.team.name, role: team.role };
       });
       return teamsIds;
     } catch (error) {

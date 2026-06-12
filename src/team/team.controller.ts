@@ -23,7 +23,6 @@ import { ForbiddenException } from '@nestjs/common';
 export class TeamController {
   constructor(
     private readonly teamService: TeamService,
-    private readonly teamMembersService: TeamMembersService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -49,40 +48,6 @@ export class TeamController {
     }
 
     return response;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('userTeams/:id')
-  async findAllUserTeams(
-    @Param('id') id: string,
-  ): Promise<FindTeamDto[] | null> {
-    const teamsId = await this.teamMembersService.findUserTeams(Number(id));
-    let userTeams: FindTeamDto[] = [];
-    if (teamsId instanceof Prisma.PrismaClientKnownRequestError) {
-      switch (teamsId.code) {
-        default:
-          throw teamsId;
-      }
-    } else if (teamsId === null) {
-      return null;
-    } else {
-      for (let i = 0; i < teamsId.length; i++) {
-        const teamId = Number(teamsId[i]);
-        const response = await this.teamService.teams({
-          where: { id: teamId },
-          orderBy: { id: 'asc' },
-        });
-        if (response instanceof Prisma.PrismaClientKnownRequestError) {
-          switch (response.code) {
-            default:
-              throw response;
-          }
-        }
-        userTeams.push(...(response as FindTeamDto[]));
-      }
-    }
-
-    return userTeams;
   }
 
   @UseGuards(JwtAuthGuard)
