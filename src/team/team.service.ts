@@ -114,10 +114,7 @@ export class TeamService {
     }
   }
 
-  async checkMembership(
-    userId: number,
-    teamId: number,
-  ): Promise<boolean> {
+  async checkMembership(userId: number, teamId: number): Promise<boolean> {
     try {
       const member = await this.prisma.teamMember.findUnique({
         where: {
@@ -125,6 +122,7 @@ export class TeamService {
             userId,
             teamId,
           },
+          NOT: { role: 'PENDING' },
         },
       });
       return !!member;
