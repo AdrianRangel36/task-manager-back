@@ -96,13 +96,11 @@ export class TeamMembersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Put('changerole')
   async update(
-    @Param('id') id: string,
     @Body() updateTeamMemberDto: UpdateTeamMemberDto,
   ) {
     const response = await this.teamMembersService.updateTeamMember(
-      +id,
       updateTeamMemberDto,
     );
 

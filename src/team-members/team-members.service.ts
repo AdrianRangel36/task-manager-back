@@ -93,7 +93,7 @@ export class TeamMembersService {
         include: { team: { select: { name: true } } },
       });
       if (records.length === 0) {
-        return null
+        return null;
       }
       const teamsIds = records.map((team) => {
         return { teamId: team.teamId, name: team.team.name, role: team.role };
@@ -108,12 +108,16 @@ export class TeamMembersService {
   }
 
   async updateTeamMember(
-    id: number,
     updateTeamMemberDto: UpdateTeamMemberDto,
   ): Promise<TeamMember | Prisma.PrismaClientKnownRequestError> {
     try {
       return await this.prisma.teamMember.update({
-        where: { id },
+        where: {
+          userId_teamId: {
+            userId: updateTeamMemberDto.userId,
+            teamId: updateTeamMemberDto.teamId,
+          },
+        },
         data: updateTeamMemberDto,
       });
     } catch (error) {
