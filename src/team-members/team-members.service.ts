@@ -50,6 +50,7 @@ export class TeamMembersService {
         include: {
           user: {
             select: {
+              id: true,
               name: true,
               paternalSurname: true,
               maternalSurname: true,
